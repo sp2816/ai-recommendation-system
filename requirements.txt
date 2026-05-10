@@ -1,0 +1,10 @@
+pandas
+numpy
+matplotlib
+scikit-learn
+tensorflow
+jupyter
+notebook
+fastapi
+uvicorn
+faiss-cpu
