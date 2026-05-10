@@ -19,5 +19,3 @@ To build an intelligent recommendation engine that provides personalized product
 - Scikit-learn
 - FastAPI
 
-## Dataset
-H&M Personalized Fashion Recommendations Dataset
