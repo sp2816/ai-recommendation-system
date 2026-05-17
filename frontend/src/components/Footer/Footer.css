@@ -1,0 +1,24 @@
+.footer {
+  background-color: black;
+  color: white;
+
+  text-align: center;
+
+  padding: 18px;
+  margin-top: auto;
+}
+
+.footer p {
+  font-size: 1rem;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .footer {
+    padding: 14px;
+  }
+
+  .footer p {
+    font-size: 0.9rem;
+  }
+}

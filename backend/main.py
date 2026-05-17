@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from backend.app.routes.products import (
     router as products_router
@@ -27,8 +28,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Routes
 app.include_router(products_router)
 app.include_router(auth_router)
+
+# Serve H&M Images
+app.mount(
+    "/images",
+    StaticFiles(
+        directory="ml/data/raw/images"
+    ),
+    name="images"
+)
 
 @app.get("/")
 def home():
