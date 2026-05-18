@@ -114,12 +114,25 @@ def login_user(login_data):
 
         token = create_access_token({
             "user_id":
-            user_dict["id"]
+            user_dict["id"] 
         })
 
         return {
             "status": "success",
-            "token": token
+            "token": token,
+            "user": {
+                "id":
+                user_dict["id"],
+
+                "full_name":
+                user_dict["full_name"],
+
+                "email":
+                user_dict["email"],
+
+                "age":
+                user_dict["age"]
+            }
         }
 
     finally:
