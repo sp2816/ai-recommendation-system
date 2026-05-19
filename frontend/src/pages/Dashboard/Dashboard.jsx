@@ -1,152 +1,466 @@
 import "./Dashboard.css";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import {
+  useEffect,
+  useState,
+  useRef
+} from "react";
 
-import API from "../../api/productApi";
+import {
+  Link,
+  useLocation
+} from "react-router-dom";
+
+import API
+from "../../api/productApi";
 
 function Dashboard() {
-  const [products, setProducts] =
+
+  const [products,
+    setProducts] =
     useState([]);
 
+  const [
+    trendingProducts,
+    setTrendingProducts
+  ] = useState([]);
+
+  const [
+    selectedCategory,
+    setSelectedCategory
+  ] = useState("All");
+
+  const productsRef =
+    useRef(null);
+
+  const location =
+    useLocation();
+
+  const searchParams =
+    new URLSearchParams(
+      location.search
+    );
+
+  const searchQuery =
+    searchParams.get(
+      "search"
+    );
+
+  const categories = [
+    "All",
+    "Dress",
+    "Top",
+    "Trousers",
+    "Shoes",
+    "Nightwear"
+  ];
+
   useEffect(() => {
+
     fetchProducts();
-  }, []);
+    fetchTrendingProducts();
+
+  }, [
+  searchQuery,
+  selectedCategory
+]);
 
   const fetchProducts =
     async () => {
+
       try {
-        const response =
-          await API.get("/products");
+
+        let response;
+
+        if (
+          searchQuery
+        ) {
+
+          response =
+            await API.get(
+              `/products/search?query=${searchQuery}`
+            );
+
+        } else if (
+          selectedCategory
+          !== "All"
+        ) {
+
+          response =
+            await API.get(
+              `/products/search?query=${selectedCategory}`
+            );
+
+        } else {
+
+          response =
+            await API.get(
+              "/products"
+            );
+        }
 
         setProducts(
           response.data.products
         );
+
       } catch (error) {
+
         console.log(error);
       }
     };
 
+  const fetchTrendingProducts =
+    async () => {
+
+      try {
+
+        const response =
+          await API.get(
+            "/products/trending"
+          );
+
+        setTrendingProducts(
+          response.data.products
+        );
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
+  const handleExplore =
+    () => {
+
+      productsRef.current
+      ?.scrollIntoView({
+        behavior:
+        "smooth"
+      });
+    };
+
+  const displayedProducts =
+  searchQuery
+  ? products
+  : selectedCategory
+    === "All"
+  ? products
+  : products.filter(
+      (product) => {
+
+        const productName =
+          product
+          ?.product_name
+          ?.toLowerCase() || "";
+
+        return productName.includes(
+          selectedCategory
+          .toLowerCase()
+        );
+      }
+    );
+
   return (
-  <div className="dashboard">
+    <div className="dashboard">
 
-    <section className="hero-section">
-      <h1>
-        AI Fashion Recommendation
-      </h1>
+      {!searchQuery && (
 
-      <p>
-        Discover personalized
-        fashion recommendations
-        based on your style.
-      </p>
+        <section className="hero-section">
 
-      <button>
-        Explore Now
-      </button>
-    </section>
+          <h1>
+            AI Fashion Recommendation
+          </h1>
 
+          <p>
+            Discover personalized
+            fashion recommendations
+            based on your style.
+          </p>
 
-    {/* Recommended Products */}
-    <section className="products-section">
-
-      <h2>
-        Recommended For You
-      </h2>
-
-      <div className="product-grid">
-
-        {products
-          .slice(0, 8)
-          .map((product) => (
-
-          <Link
-            key={product.article_id}
-            to={`/product/${product.article_id}`}
-            className="product-link"
+          <button
+            onClick={
+              handleExplore
+            }
           >
-            <div className="product-card">
+            Explore Now
+          </button>
 
-              <img
-                src={
-                  product.image_url ||
-                  "https://via.placeholder.com/250"
-                }
-                alt={
-                  product.product_name
-                }
-              />
+        </section>
+      )}
 
-              <h3>
-                {
-                  product.product_name
+      {!searchQuery && (
+
+        <section
+          className="category-section"
+        >
+
+          {categories.map(
+            (category) => (
+
+            <button
+              key={category}
+
+              className={
+                selectedCategory
+                === category
+                ? "category-btn active"
+                : "category-btn"
+              }
+
+              onClick={() =>
+                setSelectedCategory(
+                  category
+                )
+              }
+            >
+
+              {category}
+
+            </button>
+          ))}
+
+        </section>
+      )}
+
+      <section
+        ref={productsRef}
+        className="products-section"
+      >
+
+        <h2>
+
+          {searchQuery
+            ? `Search Results for "${searchQuery}"`
+            : "Recommended For You"
+          }
+
+        </h2>
+
+        <div
+          className="product-grid"
+        >
+
+          {displayedProducts
+          .length > 0 ? (
+
+            displayedProducts.map(
+              (product) => (
+
+              <Link
+                key={
+                  product.article_id
                 }
-              </h3>
+
+                to={`/product/${
+                  product.article_id
+                }`}
+
+                className="product-link"
+              >
+
+                <div
+                  className="product-card"
+                >
+
+                  <img
+                    src={
+                      product.image_url
+                    }
+
+                    alt={
+                      product.product_name
+                    }
+                  />
+
+                  <h3>
+                    {
+                      product.product_name
+                    }
+                  </h3>
+
+                  <p>
+                    ₹{
+                      product.price
+                    }
+                  </p>
+
+                </div>
+
+              </Link>
+            ))
+
+          ) : (
+
+            <div className="empty-search">
+
+              <h2>
+                No Products Found
+              </h2>
 
               <p>
-                ₹{product.price}
+                Try another search.
               </p>
 
             </div>
-          </Link>
+          )}
 
-        ))}
+        </div>
 
-      </div>
+      </section>
 
-    </section>
+      {!searchQuery && (
 
+        <section
+          className="products-section"
+        >
 
-    {/* Trending Products */}
-    <section className="products-section">
+          <h2>
+            Trending Fashion
+          </h2>
 
-      <h2>
-        Trending Fashion
-      </h2>
-
-      <div className="product-grid">
-
-        {products
-          .slice(8, 16)
-          .map((product) => (
-
-          <Link
-            key={product.article_id}
-            to={`/product/${product.article_id}`}
-            className="product-link"
+          <div
+            className="product-grid"
           >
-            <div className="product-card">
 
-              <img
-                src={
-                  product.image_url ||
-                  "https://via.placeholder.com/250"
+            {trendingProducts
+              .filter((product) => {
+
+                if (
+                  selectedCategory
+                  === "All"
+                ) {
+                  return true;
                 }
-                alt={
-                  product.product_name
+
+                const productType =
+                  product
+                  ?.product_type_name
+                  ?.toLowerCase() || "";
+
+                const productGroup =
+                  product
+                  ?.product_group_name
+                  ?.toLowerCase() || "";
+
+                switch (
+                  selectedCategory
+                ) {
+
+                  case "Dress":
+                    return (
+                      productType.includes(
+                        "dress"
+                      )
+                    );
+
+                  case "Top":
+                    return (
+                      productType.includes(
+                        "top"
+                      ) ||
+
+                      productType.includes(
+                        "t-shirt"
+                      ) ||
+
+                      productGroup.includes(
+                        "upper body"
+                      )
+                    );
+
+                  case "Trousers":
+                    return (
+                      productType.includes(
+                        "trouser"
+                      ) ||
+
+                      productType.includes(
+                        "jogger"
+                      ) ||
+
+                      productType.includes(
+                        "jeans"
+                      )
+                    );
+
+                  case "Shoes":
+                    return (
+                      productType.includes(
+                        "shoe"
+                      ) ||
+
+                      productGroup.includes(
+                        "shoes"
+                      )
+                    );
+
+                  case "Nightwear":
+                    return (
+                      productGroup.includes(
+                        "nightwear"
+                      ) ||
+
+                      productType.includes(
+                        "pyjama"
+                      )
+                    );
+
+                  default:
+                    return true;
                 }
-              />
+              })
+              .map(
+              (product) => (
 
-              <h3>
-                {
-                  product.product_name
+              <Link
+                key={
+                  product.article_id
                 }
-              </h3>
 
-              <p>
-                ₹{product.price}
-              </p>
+                to={`/product/${
+                  product.article_id
+                }`}
 
-            </div>
-          </Link>
+                className="product-link"
+              >
 
-        ))}
+                <div
+                  className="product-card"
+                >
 
-      </div>
+                  <img
+                    src={
+                      product.image_url
+                    }
 
-    </section>
+                    alt={
+                      product.product_name
+                    }
+                  />
 
-  </div>
-);
+                  <h3>
+                    {
+                      product.product_name
+                    }
+                  </h3>
+
+                  <p>
+                    ₹{
+                      product.price
+                    }
+                  </p>
+
+                </div>
+
+              </Link>
+            ))}
+
+          </div>
+
+        </section>
+      )}
+
+    </div>
+  );
 }
 
 export default Dashboard;

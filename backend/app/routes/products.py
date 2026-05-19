@@ -7,7 +7,7 @@ router = APIRouter()
 
 
 @router.get("/products")
-def get_products(limit: int = 20):
+def get_products(limit: int = 1000):
 
     db = SessionLocal()
 
@@ -112,6 +112,157 @@ def get_products(limit: int = 20):
     finally:
         db.close()
 
+@router.get("/products/search")
+def search_products(
+    query: str
+):
+
+    db = SessionLocal()
+
+    try:
+
+        result = db.execute(
+            text("""
+                SELECT
+                    article_id,
+                    product_name,
+                    product_type_name,
+                    product_group_name,
+                    colour_group_name,
+                    price,
+                    description
+
+                FROM products
+
+                WHERE
+
+                LOWER(product_name)
+                LIKE LOWER(:query)
+
+                OR LOWER(product_type_name)
+                LIKE LOWER(:query)
+
+                OR LOWER(description)
+                LIKE LOWER(:query)
+
+                LIMIT 20
+            """),
+            {
+                "query":
+                f"%{query}%"
+            }
+        )
+
+        products = []
+
+        for row in result:
+
+            product = dict(
+                row._mapping
+            )
+
+            article_id = str(
+                product["article_id"]
+            )
+
+            folder = (
+                f"0{article_id[:2]}"
+            )
+
+            image_name = (
+                f"0{article_id}.jpg"
+            )
+
+            product["image_url"] = (
+                "http://127.0.0.1:8000/"
+                f"images/{folder}/"
+                f"{image_name}"
+            )
+
+            products.append(
+                product
+            )
+
+        return {
+            "status":
+            "success",
+
+            "products":
+            products
+        }
+
+    finally:
+        db.close()
+
+
+@router.get("/products/trending")
+def get_trending_products():
+
+    db = SessionLocal()
+
+    try:
+
+        result = db.execute(
+            text("""
+                SELECT
+                    article_id,
+                    product_name,
+                    product_type_name,
+                    product_group_name,
+                    colour_group_name,
+                    price,
+                    description
+
+                FROM products
+
+                WHERE
+                LOWER(product_type_name)
+                NOT LIKE '%bra%'
+
+                LIMIT 8
+            """)
+        )
+
+        products = []
+
+        for row in result:
+
+            product = dict(
+                row._mapping
+            )
+
+            article_id = str(
+                product["article_id"]
+            )
+
+            folder = (
+                f"0{article_id[:2]}"
+            )
+
+            image_name = (
+                f"0{article_id}.jpg"
+            )
+
+            product["image_url"] = (
+                "http://127.0.0.1:8000/"
+                f"images/{folder}/"
+                f"{image_name}"
+            )
+
+            products.append(
+                product
+            )
+
+        return {
+            "status":
+            "success",
+
+            "products":
+            products
+        }
+
+    finally:
+        db.close()
 
 @router.get("/product/{article_id}")
 def get_product(article_id: int):
