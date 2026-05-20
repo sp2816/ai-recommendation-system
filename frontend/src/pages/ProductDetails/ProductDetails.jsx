@@ -1,14 +1,23 @@
 import "./ProductDetails.css";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState
+} from "react";
 
-import API from "../../api/productApi";
+import API
+from "../../api/productApi";
+
+import WISHLIST_API
+from "../../api/wishlistApi";
 
 function ProductDetails() {
 
-  const { id } = useParams();
+  const { id } =
+    useParams();
 
-  const [product, setProduct] =
+  const [product,
+    setProduct] =
     useState(null);
 
   useEffect(() => {
@@ -30,11 +39,60 @@ function ProductDetails() {
         );
 
       } catch (error) {
+
         console.log(error);
       }
     };
 
+  const handleWishlist =
+    async () => {
+
+      const user =
+        JSON.parse(
+          localStorage.getItem(
+            "user"
+          )
+        );
+
+      if (!user) {
+
+        alert(
+          "Please login first"
+        );
+
+        return;
+      }
+
+      try {
+
+        const response =
+          await WISHLIST_API.post(
+            "/wishlist/add",
+            {
+              user_id:
+              user.id,
+
+              article_id:
+              product.article_id
+            }
+          );
+
+        alert(
+          response.data.message
+        );
+
+      } catch (error) {
+
+        console.log(error);
+
+        alert(
+          "Failed to add wishlist"
+        );
+      }
+    };
+
   if (!product) {
+
     return (
       <h1>
         Loading Product...
@@ -47,12 +105,19 @@ function ProductDetails() {
 
       <div className="details-card">
 
-        <img
-          src={product.image_url}
-          alt={
-            product.product_name
-          }
-        />
+        <div className="details-image">
+
+          <img
+            src={
+              product.image_url
+            }
+
+            alt={
+              product.product_name
+            }
+          />
+
+        </div>
 
         <div className="details-info">
 
@@ -63,16 +128,68 @@ function ProductDetails() {
           </h1>
 
           <h2>
-            ₹{product.price}
+            ₹{
+              product.price
+            }
           </h2>
 
-          <p>
-            {
-              product.description
-            }
-          </p>
+          <div className="product-meta">
 
-          <button>
+            <p>
+              <strong>
+                Type:
+              </strong>
+              {" "}
+              {
+                product
+                .product_type_name
+              }
+            </p>
+
+            <p>
+              <strong>
+                Category:
+              </strong>
+              {" "}
+              {
+                product
+                .product_group_name
+              }
+            </p>
+
+            <p>
+              <strong>
+                Colour:
+              </strong>
+              {" "}
+              {
+                product
+                .colour_group_name
+              }
+            </p>
+
+          </div>
+
+          <div className="description-box">
+
+            <h3>
+              Description
+            </h3>
+
+            <p>
+              {
+                product
+                .description
+              }
+            </p>
+
+          </div>
+
+          <button
+            onClick={
+              handleWishlist
+            }
+          >
             Add to Wishlist
           </button>
 
