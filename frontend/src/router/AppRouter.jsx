@@ -16,6 +16,7 @@ import NotFound from "../pages/NotFound/NotFound";
 
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
+import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 
 function Layout() {
   const location = useLocation();
@@ -58,17 +59,29 @@ function Layout() {
 
           <Route
             path="/wishlist"
-            element={<Wishlist />}
+            element={
+              <ProtectedRoute>
+                <Wishlist />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="/profile"
-            element={<Profile />}
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="/history"
-            element={<History />}
+            element={
+              <ProtectedRoute>
+                <History />
+              </ProtectedRoute>
+            }
           />
 
           <Route
