@@ -13,6 +13,37 @@ import {
 import API
 from "../../api/productApi";
 
+const CATEGORY_MATCHERS = {
+  Dress: ["dress", "gown", "jumpsuit"],
+  Top: ["top", "blouse", "shirt", "sweater", "cardigan", "t-shirt"],
+  Trousers: ["trousers", "jeans", "leggings", "shorts", "pants"],
+  Shoes: ["shoe", "shoes", "boot", "boots", "sneaker", "sneakers", "trainer", "trainers", "sandal", "sandals", "heel", "heels", "loafer", "loafers", "flat", "flats", "footwear"],
+  Nightwear: ["nightwear", "sleepwear", "sleep", "pyjama", "pajama", "pyjamas", "pajamas", "robe", "underwear", "lingerie"]
+};
+
+function getProductSearchText(product) {
+  return [
+    product?.product_name,
+    product?.product_type_name,
+    product?.product_group_name,
+    product?.description
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function matchesCategory(product, category) {
+  if (category === "All") {
+    return true;
+  }
+
+  const searchText = getProductSearchText(product);
+  const categoryTerms = CATEGORY_MATCHERS[category] || [category.toLowerCase()];
+
+  return categoryTerms.some((term) => searchText.includes(term));
+}
+
 function Dashboard() {
 
   const [products,
@@ -87,7 +118,9 @@ function Dashboard() {
 
           response =
             await API.get(
-              `/products/search?query=${selectedCategory}`
+              `/products?category=${encodeURIComponent(
+                selectedCategory
+              )}`
             );
 
         } else {
@@ -115,7 +148,11 @@ function Dashboard() {
 
         const response =
           await API.get(
-            "/products/trending"
+            selectedCategory === "All"
+              ? "/products/trending"
+              : `/products/trending?category=${encodeURIComponent(
+                selectedCategory
+              )}`
           );
 
         setTrendingProducts(
@@ -145,18 +182,11 @@ function Dashboard() {
     === "All"
   ? products
   : products.filter(
-      (product) => {
-
-        const productName =
-          product
-          ?.product_name
-          ?.toLowerCase() || "";
-
-        return productName.includes(
+      (product) =>
+        matchesCategory(
+          product,
           selectedCategory
-          .toLowerCase()
-        );
-      }
+        )
     );
 
   return (
@@ -321,94 +351,7 @@ function Dashboard() {
             className="product-grid"
           >
 
-            {trendingProducts
-              .filter((product) => {
-
-                if (
-                  selectedCategory
-                  === "All"
-                ) {
-                  return true;
-                }
-
-                const productType =
-                  product
-                  ?.product_type_name
-                  ?.toLowerCase() || "";
-
-                const productGroup =
-                  product
-                  ?.product_group_name
-                  ?.toLowerCase() || "";
-
-                switch (
-                  selectedCategory
-                ) {
-
-                  case "Dress":
-                    return (
-                      productType.includes(
-                        "dress"
-                      )
-                    );
-
-                  case "Top":
-                    return (
-                      productType.includes(
-                        "top"
-                      ) ||
-
-                      productType.includes(
-                        "t-shirt"
-                      ) ||
-
-                      productGroup.includes(
-                        "upper body"
-                      )
-                    );
-
-                  case "Trousers":
-                    return (
-                      productType.includes(
-                        "trouser"
-                      ) ||
-
-                      productType.includes(
-                        "jogger"
-                      ) ||
-
-                      productType.includes(
-                        "jeans"
-                      )
-                    );
-
-                  case "Shoes":
-                    return (
-                      productType.includes(
-                        "shoe"
-                      ) ||
-
-                      productGroup.includes(
-                        "shoes"
-                      )
-                    );
-
-                  case "Nightwear":
-                    return (
-                      productGroup.includes(
-                        "nightwear"
-                      ) ||
-
-                      productType.includes(
-                        "pyjama"
-                      )
-                    );
-
-                  default:
-                    return true;
-                }
-              })
-              .map(
+            {trendingProducts.map(
               (product) => (
 
               <Link
