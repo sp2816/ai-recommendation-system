@@ -38,9 +38,6 @@ df["price"] = 999
 df["image_url"] = None
 df["product_url"] = None
 
-# Limit rows for demo
-df = df.head(1000)
-
 # Insert into PostgreSQL
 df.to_sql(
     "products",

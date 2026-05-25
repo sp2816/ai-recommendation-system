@@ -10,6 +10,14 @@ from backend.app.routes.auth import (
     router as auth_router
 )
 
+from backend.app.routes.wishlist import (
+    router as wishlist_router
+)
+
+from backend.app.routes.search import (
+    router as search_router
+)
+
 app = FastAPI(
     title="AI Recommendation System API"
 )
@@ -31,6 +39,8 @@ app.add_middleware(
 # Routes
 app.include_router(products_router)
 app.include_router(auth_router)
+app.include_router(wishlist_router)
+app.include_router(search_router)
 
 # Serve H&M Images
 app.mount(
