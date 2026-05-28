@@ -34,8 +34,11 @@ function ProductDetails() {
             `/product/${id}`
           );
 
+        const fetchedProduct =
+          response.data.product;
+
         setProduct(
-          response.data.product
+          fetchedProduct
         );
 
       } catch (error) {
@@ -201,4 +204,4 @@ function ProductDetails() {
   );
 }
 
-export default ProductDetails;
+export default ProductDetails;  
