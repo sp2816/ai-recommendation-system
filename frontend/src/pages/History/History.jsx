@@ -1,26 +1,64 @@
 import "./History.css";
 
 function History() {
+
+  const historyItems = [];
+
   return (
     <div className="history-page">
 
       <div className="history-header">
-        <h1>Recommendation History</h1>
+
+        <h1>
+          Recommendation History
+        </h1>
 
         <p>
-          Track your viewed and
-          recommended products.
+          Previously recommended
+          fashion products based
+          on your interests.
         </p>
+
       </div>
 
-      <div className="history-empty">
-        <h2>No activity yet</h2>
+      {historyItems.length === 0 ? (
 
-        <p>
-          Your recommendation
-          history will appear here.
-        </p>
-      </div>
+        <div className="history-empty">
+
+          <div className="empty-icon">
+            🛍️
+          </div>
+
+          <h2>
+            No Recommendations Yet
+          </h2>
+
+          <p>
+            Start exploring fashion
+            products and AI
+            recommendations will
+            appear here.
+          </p>
+
+        </div>
+
+      ) : (
+
+        <div className="history-grid">
+
+          {historyItems.map(
+            (item) => (
+
+            <div
+              key={item.id}
+              className="history-card"
+            >
+              Product
+            </div>
+          ))}
+
+        </div>
+      )}
 
     </div>
   );
