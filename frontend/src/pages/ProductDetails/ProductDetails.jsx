@@ -11,6 +11,17 @@ from "../../api/productApi";
 import WISHLIST_API
 from "../../api/wishlistApi";
 
+import {
+  getLoggedInUser,
+  saveAnonymousView
+} from "../../services/recommendationContext";
+
+const FALLBACK_IMAGE =
+  "data:image/svg+xml;charset=UTF-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400"><rect width="300" height="400" fill="#f3f4f6"/><text x="150" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#6b7280">No Image</text><text x="150" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#9ca3af">Available</text></svg>'
+  );
+
 function ProductDetails() {
 
   const { id } =
@@ -40,6 +51,24 @@ function ProductDetails() {
         setProduct(
           fetchedProduct
         );
+
+        const user = getLoggedInUser();
+
+        if (user) {
+          try {
+            await API.post(
+              "/api/views/save",
+              {
+                user_id: user.id,
+                article_id: fetchedProduct.article_id
+              }
+            );
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          saveAnonymousView(fetchedProduct);
+        }
 
       } catch (error) {
 
@@ -118,6 +147,9 @@ function ProductDetails() {
             alt={
               product.product_name
             }
+            onError={(e) => {
+              e.currentTarget.src = FALLBACK_IMAGE;
+            }}
           />
 
         </div>

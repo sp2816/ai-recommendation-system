@@ -1,15 +1,18 @@
 .footer {
-  background-color: black;
+  background: linear-gradient(135deg, #000 0%, #111 100%);
   color: white;
 
   text-align: center;
 
   padding: 18px;
   margin-top: auto;
+  border-top: 1px solid #222;
+  transition: all 0.3s ease;
 }
 
 .footer p {
   font-size: 1rem;
+  color: #ccc;
 }
 
 /* Mobile */

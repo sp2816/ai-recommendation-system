@@ -3,6 +3,11 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 
+import {
+  saveAnonymousSearch,
+  getLoggedInUser
+} from "../../services/recommendationContext";
+
 function Header() {
 
   const navigate =
@@ -12,12 +17,7 @@ function Header() {
     setSearch] =
     useState("");
 
-  const user =
-    JSON.parse(
-      localStorage.getItem(
-        "user"
-      )
-    );
+  const user = getLoggedInUser();
 
   const handleLogout =
     () => {
@@ -28,6 +28,10 @@ function Header() {
 
       localStorage.removeItem(
         "user"
+      );
+
+      localStorage.removeItem(
+        "user_id"
       );
 
       window.location.reload();
@@ -47,27 +51,24 @@ function Header() {
       return;
     }
 
-    const user =
-      JSON.parse(
-        localStorage.getItem(
-          "user"
-        )
-      );
+    const currentUser = getLoggedInUser();
 
     try {
 
-      if (user) {
+      if (currentUser) {
 
         await axios.post(
           "http://127.0.0.1:8000/api/search/save",
           {
             user_id:
-            user.id,
+            currentUser.id,
 
             search_query:
             search
           }
         );
+      } else {
+        saveAnonymousSearch(search);
       }
 
     } catch (error) {

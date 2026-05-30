@@ -1,8 +1,8 @@
 import "./Dashboard.css";
+
 import {
   useEffect,
-  useState,
-  useRef
+  useState
 } from "react";
 
 import {
@@ -10,398 +10,145 @@ import {
   useLocation
 } from "react-router-dom";
 
-import API
-from "../../api/productApi";
+import API from "../../api/productApi";
 
-const CATEGORY_MATCHERS = {
-  Dress: ["dress", "gown", "jumpsuit"],
-  Top: ["top", "blouse", "shirt", "sweater", "cardigan", "t-shirt"],
-  Trousers: ["trousers", "jeans", "leggings", "shorts", "pants"],
-  Shoes: ["shoe", "shoes", "boot", "boots", "sneaker", "sneakers", "trainer", "trainers", "sandal", "sandals", "heel", "heels", "loafer", "loafers", "flat", "flats", "footwear"],
-  Nightwear: ["nightwear", "sleepwear", "sleep", "pyjama", "pajama", "pyjamas", "pajamas", "robe", "underwear", "lingerie"]
-};
+import RecommendedProducts from "../../components/RecommendedProducts";
 
-function getProductSearchText(product) {
-  return [
-    product?.product_name,
-    product?.product_type_name,
-    product?.product_group_name,
-    product?.description
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-}
+import {
+  getLoggedInUser
+} from "../../services/recommendationContext";
 
-function matchesCategory(product, category) {
-  if (category === "All") {
-    return true;
-  }
+import {
+  getRecommendations
+} from "../../services/recommendationService";
 
-  const searchText = getProductSearchText(product);
-  const categoryTerms = CATEGORY_MATCHERS[category] || [category.toLowerCase()];
+const FALLBACK_IMAGE =
+  "data:image/svg+xml;charset=UTF-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400"><rect width="300" height="400" fill="#f3f4f6"/><text x="150" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#6b7280">No Image</text><text x="150" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#9ca3af">Available</text></svg>'
+  );
 
-  return categoryTerms.some((term) => searchText.includes(term));
-}
 
 function Dashboard() {
+  const location = useLocation();
+  const currentUser = getLoggedInUser();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const [products,
-    setProducts] =
-    useState([]);
-
-  const [
-    trendingProducts,
-    setTrendingProducts
-  ] = useState([]);
-
-  const [
-    selectedCategory,
-    setSelectedCategory
-  ] = useState("All");
-
-  const productsRef =
-    useRef(null);
-
-  const location =
-    useLocation();
-
-  const searchParams =
-    new URLSearchParams(
-      location.search
-    );
-
-  const searchQuery =
-    searchParams.get(
-      "search"
-    );
-
-  const categories = [
-    "All",
-    "Dress",
-    "Top",
-    "Trousers",
-    "Shoes",
-    "Nightwear"
-  ];
+  const searchParams = new URLSearchParams(location.search);
+  const searchQuery = searchParams.get("search") || "";
 
   useEffect(() => {
+    let isActive = true;
 
-    fetchProducts();
-    fetchTrendingProducts();
-
-  }, [
-  searchQuery,
-  selectedCategory
-]);
-
-  const fetchProducts =
-    async () => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError("");
 
       try {
+        let endpoint;
 
-        let response;
+        if (searchQuery) {
+          endpoint = `/products/search?query=${encodeURIComponent(searchQuery)}`;
+        } else if (currentUser?.id) {
+          const recommendationResponse = await getRecommendations(currentUser.id);
+          const preferredCategory =
+            recommendationResponse?.user_profile?.interest_categories?.[0] ||
+            recommendationResponse?.user_profile?.favorite_product_type;
 
-        if (
-          searchQuery
-        ) {
-
-          response =
-            await API.get(
-              `/products/search?query=${searchQuery}`
-            );
-
-        } else if (
-          selectedCategory
-          !== "All"
-        ) {
-
-          response =
-            await API.get(
-              `/products?category=${encodeURIComponent(
-                selectedCategory
-              )}`
-            );
-
+          endpoint = preferredCategory
+            ? `/products/trending?category=${encodeURIComponent(preferredCategory)}`
+            : "/products/trending";
         } else {
-
-          response =
-            await API.get(
-              "/products"
-            );
+          endpoint = "/products/trending";
         }
 
-        setProducts(
-          response.data.products
-        );
+        const response = await API.get(endpoint);
 
-      } catch (error) {
+        if (!isActive) {
+          return;
+        }
 
-        console.log(error);
+        setProducts(response.data.products || []);
+      } catch (fetchError) {
+        if (!isActive) {
+          return;
+        }
+
+        setProducts([]);
+        setError("Failed to load products.");
+        console.log(fetchError);
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
       }
     };
 
-  const fetchTrendingProducts =
-    async () => {
+    fetchProducts();
 
-      try {
-
-        const response =
-          await API.get(
-            selectedCategory === "All"
-              ? "/products/trending"
-              : `/products/trending?category=${encodeURIComponent(
-                selectedCategory
-              )}`
-          );
-
-        setTrendingProducts(
-          response.data.products
-        );
-
-      } catch (error) {
-
-        console.log(error);
-      }
+    return () => {
+      isActive = false;
     };
+  }, [searchQuery, currentUser?.id]);
 
-  const handleExplore =
-    () => {
-
-      productsRef.current
-      ?.scrollIntoView({
-        behavior:
-        "smooth"
-      });
-    };
-
-  const displayedProducts =
-  searchQuery
-  ? products
-  : selectedCategory
-    === "All"
-  ? products
-  : products.filter(
-      (product) =>
-        matchesCategory(
-          product,
-          selectedCategory
-        )
+  if (loading) {
+    return (
+      <div className="dashboard">
+        <section className="products-section">
+          <h2>Loading products...</h2>
+        </section>
+      </div>
     );
+  }
 
   return (
     <div className="dashboard">
+      {!searchQuery && <RecommendedProducts />}
 
-      {!searchQuery && (
-
-        <section className="hero-section">
-
-          <h1>
-            AI Fashion Recommendation
-          </h1>
-
-          <p>
-            Discover personalized
-            fashion recommendations
-            based on your style.
-          </p>
-
-          <button
-            onClick={
-              handleExplore
-            }
-          >
-            Explore Now
-          </button>
-
-        </section>
-      )}
-
-      {!searchQuery && (
-
-        <section
-          className="category-section"
-        >
-
-          {categories.map(
-            (category) => (
-
-            <button
-              key={category}
-
-              className={
-                selectedCategory
-                === category
-                ? "category-btn active"
-                : "category-btn"
-              }
-
-              onClick={() =>
-                setSelectedCategory(
-                  category
-                )
-              }
-            >
-
-              {category}
-
-            </button>
-          ))}
-
-        </section>
-      )}
-
-      <section
-        ref={productsRef}
-        className="products-section"
-      >
-
+      <section className="products-section">
         <h2>
-
           {searchQuery
             ? `Search Results for "${searchQuery}"`
-            : "Recommended For You"
-          }
-
+            : "Trending Fashion"}
         </h2>
 
-        <div
-          className="product-grid"
-        >
-
-          {displayedProducts
-          .length > 0 ? (
-
-            displayedProducts.map(
-              (product) => (
-
+        <div className="product-grid">
+          {error ? (
+            <div className="empty-search">
+              <h2>{error}</h2>
+              <p>Please try again.</p>
+            </div>
+          ) : products.length > 0 ? (
+            products.map((product) => (
               <Link
-                key={
-                  product.article_id
-                }
-
-                to={`/product/${
-                  product.article_id
-                }`}
-
+                key={product.article_id}
+                to={`/product/${product.article_id}`}
                 className="product-link"
               >
-
-                <div
-                  className="product-card"
-                >
-
+                <div className="product-card">
                   <img
-                    src={
-                      product.image_url
-                    }
-
-                    alt={
-                      product.product_name
-                    }
+                    src={product.image_url}
+                    alt={product.product_name}
+                    onError={(e) => {
+                      e.currentTarget.src = FALLBACK_IMAGE;
+                    }}
                   />
 
-                  <h3>
-                    {
-                      product.product_name
-                    }
-                  </h3>
-
-                  <p>
-                    ₹{
-                      product.price
-                    }
-                  </p>
-
+                  <h3>{product.product_name}</h3>
+                  <p>₹{product.price}</p>
                 </div>
-
               </Link>
             ))
-
           ) : (
-
             <div className="empty-search">
-
-              <h2>
-                No Products Found
-              </h2>
-
-              <p>
-                Try another search.
-              </p>
-
+              <h2>No Products Found</h2>
+              <p>Try another search.</p>
             </div>
           )}
-
         </div>
-
       </section>
-
-      {!searchQuery && (
-
-        <section
-          className="products-section"
-        >
-
-          <h2>
-            Trending Fashion
-          </h2>
-
-          <div
-            className="product-grid"
-          >
-
-            {trendingProducts.map(
-              (product) => (
-
-              <Link
-                key={
-                  product.article_id
-                }
-
-                to={`/product/${
-                  product.article_id
-                }`}
-
-                className="product-link"
-              >
-
-                <div
-                  className="product-card"
-                >
-
-                  <img
-                    src={
-                      product.image_url
-                    }
-
-                    alt={
-                      product.product_name
-                    }
-                  />
-
-                  <h3>
-                    {
-                      product.product_name
-                    }
-                  </h3>
-
-                  <p>
-                    ₹{
-                      product.price
-                    }
-                  </p>
-
-                </div>
-
-              </Link>
-            ))}
-
-          </div>
-
-        </section>
-      )}
-
     </div>
   );
 }
