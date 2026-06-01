@@ -29,16 +29,26 @@ redis_client = redis.Redis(
 )
 
 
-def _build_default_profile(user_id: int, db):
+def _build_default_profile(user_id, db):
 
-    user_row = db.execute(
-        text("""
-            SELECT id, age
-            FROM users
-            WHERE id = :user_id
-        """),
-        {"user_id": user_id}
-    ).fetchone()
+    # user_id may be a string (external id) or an int (DB id). Try to coerce
+    # to int for DB lookups; if coercion fails, treat as missing and return
+    # a default cold-start profile.
+    try:
+        db_user_id = int(user_id)
+    except Exception:
+        db_user_id = None
+
+    user_row = None
+    if db_user_id is not None:
+        user_row = db.execute(
+            text("""
+                SELECT id, age
+                FROM users
+                WHERE id = :user_id
+            """),
+            {"user_id": db_user_id}
+        ).fetchone()
 
     age = 25
     if user_row:
@@ -58,37 +68,47 @@ def _build_default_profile(user_id: int, db):
     }
 
 
-def _extract_interest_categories(user_id: int, db):
+def _extract_interest_categories(user_id, db):
 
     category_scores = Counter()
 
-    viewed_types = db.execute(
-        text("""
-            SELECT p.product_type_name
-            FROM view_history vh
-            JOIN products p ON vh.article_id = p.article_id
-            WHERE vh.user_id = :user_id
-            ORDER BY vh.viewed_at DESC
-            LIMIT 25
-        """),
-        {"user_id": user_id}
-    ).fetchall()
+    # Only query view_history/search_history when user_id maps to an integer
+    try:
+        db_user_id = int(user_id)
+    except Exception:
+        db_user_id = None
+
+    viewed_types = []
+    if db_user_id is not None:
+        viewed_types = db.execute(
+            text("""
+                SELECT p.product_type_name
+                FROM view_history vh
+                JOIN products p ON vh.article_id = p.article_id
+                WHERE vh.user_id = :user_id
+                ORDER BY vh.viewed_at DESC
+                LIMIT 25
+            """),
+            {"user_id": db_user_id}
+        ).fetchall()
 
     for index, row in enumerate(viewed_types):
         product_type = row._mapping.get("product_type_name")
         if product_type:
             category_scores[product_type] += max(1, 5 - min(index, 4))
 
-    searches = db.execute(
-        text("""
-            SELECT search_query
-            FROM search_history
-            WHERE user_id = :user_id
-            ORDER BY searched_at DESC
-            LIMIT 25
-        """),
-        {"user_id": user_id}
-    ).fetchall()
+    searches = []
+    if db_user_id is not None:
+        searches = db.execute(
+            text("""
+                SELECT search_query
+                FROM search_history
+                WHERE user_id = :user_id
+                ORDER BY searched_at DESC
+                LIMIT 25
+            """),
+            {"user_id": db_user_id}
+        ).fetchall()
 
     from backend.app.routes.products import CATEGORY_SEARCH_TERMS
 
@@ -115,7 +135,7 @@ def _extract_interest_categories(user_id: int, db):
     return ranked_categories
 
 
-def _apply_recent_activity(user_profile, user_id: int, db):
+def _apply_recent_activity(user_profile, user_id, db):
 
     interest_categories = _extract_interest_categories(user_id, db)
     user_profile["interest_categories"] = interest_categories
@@ -229,9 +249,18 @@ def _diversify_recommendations(recommended_products, interest_categories, target
     return diversified[:target_count]
 
 
-def _log_recommendation_history(user_id: int, recommended_products, db):
+def _log_recommendation_history(user_id, recommended_products, db):
 
     if not recommended_products:
+        return
+
+    try:
+        db_user_id = int(user_id)
+    except Exception:
+        db_user_id = None
+
+    if db_user_id is None:
+        # cannot log without a numeric DB user id
         return
 
     for product in recommended_products[:10]:
@@ -267,7 +296,7 @@ def _log_recommendation_history(user_id: int, recommended_products, db):
                 )
             """),
             {
-                "user_id": user_id,
+                "user_id": db_user_id,
                 "article_id": product_row._mapping["id"]
             }
         )
@@ -275,7 +304,7 @@ def _log_recommendation_history(user_id: int, recommended_products, db):
 
 @router.get("/{user_id}")
 def recommend(
-    user_id: int
+    user_id: str
 ):
 
     db = SessionLocal()
