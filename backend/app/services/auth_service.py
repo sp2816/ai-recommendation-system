@@ -1,4 +1,7 @@
 from sqlalchemy import text
+import json
+
+import redis
 
 from backend.app.database.db import SessionLocal
 from backend.app.utils.hash import (
@@ -8,6 +11,43 @@ from backend.app.utils.hash import (
 from backend.app.utils.token import (
     create_access_token
 )
+
+
+redis_client = redis.Redis(
+    host="localhost",
+    port=6379,
+    db=0,
+    decode_responses=True
+)
+
+
+def _upsert_recommendation_profile(user_dict):
+
+    profile = {
+        "customer_id": str(user_dict["id"]),
+        "favorite_product_type": "Top",
+        "season": "Spring",
+        "age": float(user_dict.get("age") or 25),
+        "purchase_frequency": 1.0,
+        "avg_spend": 0.0,
+        "repeat_purchase_ratio": 0.0,
+        "source": "auth_user",
+        "app_user_id": user_dict["id"]
+    }
+
+    key = f"user:{user_dict['id']}"
+
+    try:
+        existing = redis_client.get(key)
+        if existing:
+            existing_profile = json.loads(existing)
+            existing_profile.update(profile)
+            profile = existing_profile
+
+        redis_client.set(key, json.dumps(profile))
+    except Exception:
+        # non-fatal: auth should still work if Redis is unavailable
+        pass
 
 
 def register_user(user_data):
@@ -67,6 +107,18 @@ def register_user(user_data):
 
         db.commit()
 
+        created_user = db.execute(
+            text("""
+            SELECT *
+            FROM users
+            WHERE email = :email
+            """),
+            {"email": user_data.email}
+        ).fetchone()
+
+        if created_user:
+            _upsert_recommendation_profile(dict(created_user._mapping))
+
         return {
             "status": "success",
             "message":
@@ -112,6 +164,8 @@ def login_user(login_data):
                 "Invalid credentials"
             }
 
+        _upsert_recommendation_profile(user_dict)
+
         token = create_access_token({
             "user_id":
             user_dict["id"] 
@@ -123,6 +177,9 @@ def login_user(login_data):
             "user": {
                 "id":
                 user_dict["id"],
+
+                "customer_id":
+                str(user_dict["id"]),
 
                 "full_name":
                 user_dict["full_name"],

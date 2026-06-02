@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 import redis
 import json
+import os
 from collections import Counter
 
 from sqlalchemy import text
@@ -22,7 +23,10 @@ router = APIRouter(
 
 
 redis_client = redis.Redis(
-    host="localhost",
+    host=os.getenv(
+        "REDIS_HOST",
+        "redis"
+    ),
     port=6379,
     db=0,
     decode_responses=True
@@ -263,6 +267,18 @@ def _log_recommendation_history(user_id, recommended_products, db):
         # cannot log without a numeric DB user id
         return
 
+    user_exists = db.execute(
+        text("""
+            SELECT id
+            FROM users
+            WHERE id = :user_id
+        """),
+        {"user_id": db_user_id}
+    ).fetchone()
+
+    if not user_exists:
+        return
+
     for product in recommended_products[:10]:
         article_id = product.get("article_id")
         if not article_id:
@@ -310,10 +326,20 @@ def recommend(
     db = SessionLocal()
 
     try:
-        user_profile = redis_client.get(f"user:{user_id}")
+        # Try to fetch a cached user profile from Redis. If Redis is
+        # unavailable (e.g. not running locally) fall back to the default
+        # cold-start profile so the recommendation endpoint remains usable.
+        user_profile = None
+        try:
+            user_profile = redis_client.get(f"user:{user_id}")
+        except Exception:
+            user_profile = None
 
         if user_profile:
-            user_profile = json.loads(user_profile)
+            try:
+                user_profile = json.loads(user_profile)
+            except Exception:
+                user_profile = _build_default_profile(user_id, db)
         else:
             user_profile = _build_default_profile(user_id, db)
 
@@ -322,7 +348,7 @@ def recommend(
         # get a larger candidate set from the ANN search
         recommended_ids = get_recommendations(
             user_profile,
-            top_k=200
+            top_k=20
         )
 
         # blend in explicit category pools from searches/views so newer intent

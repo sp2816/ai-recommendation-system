@@ -11,7 +11,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 
 # Read H&M articles dataset
-df = pd.read_csv("../../ml/data/raw/articles.csv")
+df = pd.read_csv("/app/ml/data/raw/articles.csv")
 
 # Keep useful columns only
 df = df[
