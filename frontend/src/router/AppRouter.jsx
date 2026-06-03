@@ -77,11 +77,7 @@ function Layout() {
 
           <Route
             path="/history"
-            element={
-              <ProtectedRoute>
-                <History />
-              </ProtectedRoute>
-            }
+            element={<History />}
           />
 
           <Route

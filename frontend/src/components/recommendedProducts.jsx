@@ -54,18 +54,33 @@ function RecommendedProducts() {
             return;
           }
 
-          if (data && data.error) {
-            setError(data.error);
-            setRecommendations([]);
-          } else if (data && Array.isArray(data.recommendations)) {
+          if (data && Array.isArray(data.recommendations)) {
             setRecommendations(data.recommendations);
+            setError("");
+          } else if (data && data.timeout) {
+            const trendingResponse = await API.get("/products/trending");
+
+            if (!isActive) {
+              return;
+            }
+
+            setRecommendations(trendingResponse.data.products || []);
+            setError("");
+          } else if (data && data.error) {
+            const trendingResponse = await API.get("/products/trending");
+
+            if (!isActive) {
+              return;
+            }
+
+            setRecommendations(trendingResponse.data.products || []);
             setError("");
           } else {
             setRecommendations([]);
             setError("No recommendations available right now.");
           }
         } else {
-          const activityResponse = await API.get("/products?limit=200");
+          const activityResponse = await API.get("/products?limit=80");
 
           if (!isActive) {
             return;
