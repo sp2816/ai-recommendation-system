@@ -8,8 +8,8 @@ python-dotenv
 redis
 
 python-jose
-passlib
-bcrypt
+passlib==1.7.4
+bcrypt==4.1.3
 python-multipart
 
 email-validator

@@ -21,63 +21,105 @@ function History() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+
     const fetchHistory = async () => {
+
       if (!user?.id) {
         setLoading(false);
         return;
       }
 
       try {
+
         const response = await API.get(
           `/api/history/recommendations/${user.id}`
         );
-        setHistoryItems(response.data.products || []);
+
+        setHistoryItems(
+          response.data.products || []
+        );
+
         setError("");
+
       } catch (err) {
+
         console.log(err);
-        setError("Unable to load recommendation history right now.");
+
+        setError(
+          "Unable to load recommendation history right now."
+        );
+
         setHistoryItems([]);
+
       } finally {
+
         setLoading(false);
       }
     };
 
     fetchHistory();
+
   }, [user?.id]);
 
   if (!user) {
+
     return (
       <div className="history-page">
+
         <div className="history-header">
-          <h1>Recommendation History</h1>
-          <p>Log in to view the recommendations shown to your account.</p>
+
+          <h1>
+            Recommendation History
+          </h1>
+
+          <p>
+            Log in to view the recommendations shown to your account.
+          </p>
+
         </div>
 
         <div className="history-empty">
-          <div className="empty-icon">🔐</div>
-          <h2>Login Required</h2>
+
+          <div className="empty-icon">
+            🔐
+          </div>
+
+          <h2>
+            Login Required
+          </h2>
+
           <p>
             Please log in to see your personal recommendation history.
           </p>
-          <Link className="history-login-btn" to="/login">
+
+          <Link
+            className="history-login-btn"
+            to="/login"
+          >
             Go to Login
           </Link>
+
         </div>
+
       </div>
     );
   }
 
   if (loading) {
+
     return (
       <div className="history-page">
+
         <div className="history-empty">
           <h2>Loading history...</h2>
         </div>
+
       </div>
     );
   }
 
   return (
+
     <div className="history-page">
 
       <div className="history-header">
@@ -87,14 +129,13 @@ function History() {
         </h1>
 
         <p>
-          Previously recommended
-          fashion products based
-          on your interests.
+          Previously recommended fashion products based on your interests.
         </p>
 
       </div>
 
       {error ? (
+
         <div className="history-empty">
           <h2>{error}</h2>
         </div>
@@ -112,10 +153,7 @@ function History() {
           </h2>
 
           <p>
-            Start exploring fashion
-            products and AI
-            recommendations will
-            appear here.
+            Start exploring fashion products and AI recommendations will appear here.
           </p>
 
         </div>
@@ -125,24 +163,51 @@ function History() {
         <div className="history-grid">
 
           {historyItems.map((item) => (
-            <div key={item.article_id} className="history-card">
-              <img
-                src={item.image_url}
-                alt={item.product_name}
-                onError={(e) => {
-                  e.currentTarget.src = FALLBACK_IMAGE;
-                }}
-              />
-              <div className="history-card-body">
-                <span className="history-chip">{item.product_type_name}</span>
-                <h3>{item.product_name}</h3>
-                <p>{item.colour_group_name}</p>
-                <small>{new Date(item.created_at).toLocaleString()}</small>
+
+            <Link
+              key={`${item.article_id}-${item.created_at}`}
+              to={`/product/${item.article_id}`}
+              className="history-link"
+            >
+
+              <div className="history-card">
+
+                <img
+                  src={item.image_url}
+                  alt={item.product_name}
+                  onError={(e) => {
+                    e.currentTarget.src = FALLBACK_IMAGE;
+                  }}
+                />
+
+                <div className="history-card-body">
+
+                  <span className="history-chip">
+                    {item.product_type_name}
+                  </span>
+
+                  <h3>
+                    {item.product_name}
+                  </h3>
+
+                  <p>
+                    {item.colour_group_name}
+                  </p>
+
+                  <small>
+                    {new Date(item.created_at).toLocaleString()}
+                  </small>
+
+                </div>
+
               </div>
-            </div>
+
+            </Link>
+
           ))}
 
         </div>
+
       )}
 
     </div>

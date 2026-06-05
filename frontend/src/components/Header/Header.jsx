@@ -10,44 +10,28 @@ import {
 
 function Header() {
 
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
-  const [search,
-    setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
 
   const user = getLoggedInUser();
 
-  const handleLogout =
-    () => {
+  const handleLogout = () => {
 
-      localStorage.removeItem(
-        "token"
-      );
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("user_id");
 
-      localStorage.removeItem(
-        "user"
-      );
+    navigate("/login");
+  };
 
-      localStorage.removeItem(
-        "user_id"
-      );
-
-      window.location.reload();
-    };
-
-  const handleSearch =
-  async (e) => {
+  const handleSearch = async (e) => {
 
     e.preventDefault();
 
-    if (
-      !search.trim()
-    ) {
+    if (!search.trim()) {
 
-      navigate("/");
-
+      navigate("/dashboard");
       return;
     }
 
@@ -60,14 +44,13 @@ function Header() {
         await axios.post(
           "http://127.0.0.1:8000/api/search/save",
           {
-            user_id:
-            currentUser.id,
-
-            search_query:
-            search
+            user_id: currentUser.id,
+            search_query: search
           }
         );
+
       } else {
+
         saveAnonymousSearch(search);
       }
 
@@ -76,9 +59,7 @@ function Header() {
       console.log(error);
     }
 
-    navigate(
-      `/?search=${search}`
-    );
+    navigate(`/dashboard?search=${encodeURIComponent(search)}`);
   };
 
   return (
@@ -92,27 +73,19 @@ function Header() {
 
         <form
           className="search-form"
-          onSubmit={
-            handleSearch
-          }
+          onSubmit={handleSearch}
         >
 
           <input
             type="text"
             placeholder="Search products..."
-
             value={search}
-
             onChange={(e) =>
-              setSearch(
-                e.target.value
-              )
+              setSearch(e.target.value)
             }
           />
 
-          <button
-            type="submit"
-          >
+          <button type="submit">
             Search
           </button>
 
@@ -120,7 +93,7 @@ function Header() {
 
         <nav className="nav-links">
 
-          <NavLink to="/">
+          <NavLink to="/dashboard">
             Home
           </NavLink>
 
@@ -140,20 +113,13 @@ function Header() {
             <>
               <span className="welcome-user">
 
-                Welcome,
-                {" "}
-                {
-                  user.full_name
-                }!
+                Welcome, {user.full_name}!
 
               </span>
 
               <button
                 className="logout-btn"
-
-                onClick={
-                  handleLogout
-                }
+                onClick={handleLogout}
               >
                 Logout
               </button>

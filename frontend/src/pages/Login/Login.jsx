@@ -30,7 +30,6 @@ function Login() {
     setMessage
   ] = useState("");
 
-
   const handleChange =
     (e) => {
 
@@ -42,7 +41,6 @@ function Login() {
           e.target.value
       });
     };
-
 
   const handleSubmit =
     async (e) => {
@@ -60,7 +58,6 @@ function Login() {
             formData
           );
 
-
         if (
 
           response.data.status
@@ -68,7 +65,6 @@ function Login() {
 
         ) {
 
-          // Store token
           localStorage.setItem(
 
             "token",
@@ -76,8 +72,6 @@ function Login() {
             response.data.token
           );
 
-
-          // Store full user
           localStorage.setItem(
 
             "user",
@@ -89,22 +83,18 @@ function Login() {
             )
           );
 
-
-          // Store the app user id for recommendations and history
           localStorage.setItem(
             "user_id",
             response.data.user.id
           );
 
-
           setMessage(
             "Login successful"
           );
 
-
           setTimeout(() => {
 
-            navigate("/");
+            navigate("/dashboard");
 
           }, 1000);
 
@@ -126,12 +116,19 @@ function Login() {
           error
         );
 
-        setMessage(
-          "Something went wrong"
-        );
+        if (
+          error.response?.data?.message
+        ) {
+          setMessage(
+            error.response.data.message
+          );
+        } else {
+          setMessage(
+            "Something went wrong"
+          );
+        }
       }
     };
-
 
   return (
 
@@ -140,18 +137,15 @@ function Login() {
       <div className="login-container">
 
         <Link
-          to="/"
+          to="/dashboard"
           className="back-home"
         >
-
-          ← Back to Home
-
+          ← Go to Dashboard
         </Link>
 
         <h1>
           Login
         </h1>
-
 
         <form
 
@@ -181,7 +175,6 @@ function Login() {
             required
           />
 
-
           <input
 
             type="password"
@@ -201,7 +194,6 @@ function Login() {
             required
           />
 
-
           <button
             type="submit"
           >
@@ -212,7 +204,6 @@ function Login() {
 
         </form>
 
-
         {message && (
 
           <p>
@@ -220,7 +211,6 @@ function Login() {
           </p>
 
         )}
-
 
         <p>
 

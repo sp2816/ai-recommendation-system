@@ -19,6 +19,7 @@ import Footer from "../components/Footer/Footer";
 import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 
 function Layout() {
+
   const location = useLocation();
 
   const hideLayout =
@@ -37,11 +38,19 @@ function Layout() {
 
       <main>
         <Routes>
+
+          {/* Dashboard / Home */}
           <Route
             path="/"
             element={<Dashboard />}
           />
 
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
+
+          {/* Auth */}
           <Route
             path="/login"
             element={<Login />}
@@ -52,11 +61,13 @@ function Layout() {
             element={<Register />}
           />
 
+          {/* Product Details */}
           <Route
             path="/product/:id"
             element={<ProductDetails />}
           />
 
+          {/* Wishlist */}
           <Route
             path="/wishlist"
             element={
@@ -66,6 +77,7 @@ function Layout() {
             }
           />
 
+          {/* Profile */}
           <Route
             path="/profile"
             element={
@@ -75,15 +87,22 @@ function Layout() {
             }
           />
 
+          {/* History */}
           <Route
             path="/history"
-            element={<History />}
+            element={
+              <ProtectedRoute>
+                <History />
+              </ProtectedRoute>
+            }
           />
 
+          {/* 404 */}
           <Route
             path="*"
             element={<NotFound />}
           />
+
         </Routes>
       </main>
 

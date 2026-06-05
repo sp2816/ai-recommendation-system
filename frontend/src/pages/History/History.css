@@ -185,3 +185,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+.history-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}

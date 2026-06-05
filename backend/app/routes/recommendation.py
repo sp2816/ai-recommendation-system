@@ -88,7 +88,7 @@ def _extract_interest_categories(user_id, db):
             text("""
                 SELECT p.product_type_name
                 FROM view_history vh
-                JOIN products p ON vh.article_id = p.article_id
+                JOIN products p ON vh.product_id = p.id
                 WHERE vh.user_id = :user_id
                 ORDER BY vh.viewed_at DESC
                 LIMIT 25
@@ -301,21 +301,22 @@ def _log_recommendation_history(user_id, recommended_products, db):
                 INSERT INTO user_interactions
                 (
                     user_id,
-                    article_id,
+                    product_id,
                     interaction_type
                 )
                 VALUES
                 (
                     :user_id,
-                    :article_id,
+                    :product_id,
                     'recommendation'
                 )
             """),
             {
                 "user_id": db_user_id,
-                "article_id": product_row._mapping["id"]
+                "product_id": product_row._mapping["id"]
             }
         )
+    db.commit()
 
 
 @router.get("/{user_id}")

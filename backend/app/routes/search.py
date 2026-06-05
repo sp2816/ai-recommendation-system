@@ -47,7 +47,7 @@ def save_search(
                 user_interactions
                 (
                     user_id,
-                    article_id,
+                    product_id,
                     interaction_type
                 )
                 VALUES
@@ -104,17 +104,17 @@ def save_view(
                 INSERT INTO view_history
                 (
                     user_id,
-                    article_id
+                    product_id
                 )
                 VALUES
                 (
                     :user_id,
-                    :article_id
+                    :product_id
                 )
             """),
             {
                 "user_id": data["user_id"],
-                "article_id": data["article_id"]
+                "product_id": product_row._mapping["id"]
             }
         )
 
@@ -123,19 +123,19 @@ def save_view(
                 INSERT INTO user_interactions
                 (
                     user_id,
-                    article_id,
+                    product_id,
                     interaction_type
                 )
                 VALUES
                 (
                     :user_id,
-                    :article_id,
+                    :product_id,
                     'view'
                 )
             """),
             {
                 "user_id": data["user_id"],
-                "article_id": product_row._mapping["id"]
+                "product_id": product_row._mapping["id"]
             }
         )
 

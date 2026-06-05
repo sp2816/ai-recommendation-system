@@ -3,7 +3,6 @@ from sqlalchemy import text
 
 from backend.app.database.db import SessionLocal
 
-
 router = APIRouter(prefix="/api")
 
 
@@ -13,6 +12,7 @@ def get_recommendation_history(user_id: int):
     db = SessionLocal()
 
     try:
+
         result = db.execute(
             text("""
                 SELECT
@@ -25,10 +25,10 @@ def get_recommendation_history(user_id: int):
                     p.description,
                     ui.created_at
                 FROM user_interactions ui
-                                JOIN products p
-                                        ON ui.article_id = p.id
+                JOIN products p
+                    ON ui.product_id = p.id
                 WHERE ui.user_id = :user_id
-                  AND ui.interaction_type = 'recommendation'
+                AND ui.interaction_type = 'recommendation'
                 ORDER BY ui.created_at DESC
                 LIMIT 50
             """),
@@ -38,15 +38,20 @@ def get_recommendation_history(user_id: int):
         products = []
 
         for row in result:
+
             product = dict(row._mapping)
+
             article_id = str(product["article_id"])
+
             folder = f"0{article_id[:2]}"
             image_name = f"0{article_id}.jpg"
+
             product["image_url"] = (
                 "http://127.0.0.1:8000/"
                 f"images/{folder}/"
                 f"{image_name}"
             )
+
             products.append(product)
 
         return {
