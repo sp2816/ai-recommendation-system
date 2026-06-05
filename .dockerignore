@@ -1,0 +1,16 @@
+ai_env
+__pycache__
+.pytest_cache
+node_modules
+dist
+.git
+.vscode
+.ipynb_checkpoints
+
+ml/data/raw
+
+airflow
+
+tests
+
+docs

@@ -24,6 +24,12 @@ body {
   overflow: hidden;
 }
 
+/* Remove main top padding for auth pages so forms center correctly */
+.auth-page main {
+  padding-top: 0;
+  min-height: 100vh;
+}
+
 #root {
   min-height: 100vh;
 

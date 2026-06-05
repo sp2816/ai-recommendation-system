@@ -98,3 +98,7 @@ tempCodeRunnerFile.py
 # ==========================
 ml/data/processed/
 *.parquet
+
+*.h5
+*.weights.h5
+ml/models/
