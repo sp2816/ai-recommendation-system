@@ -61,7 +61,14 @@ function Dashboard() {
             ? `/products/trending?category=${encodeURIComponent(preferredCategory)}`
             : "/products/trending";
         } else {
-          endpoint = "/products/trending";
+          const response = await API.get("/products?limit=80");
+
+          if (!isActive) {
+            return;
+          }
+
+          setProducts(response.data.products || []);
+          return;
         }
 
         const response = await API.get(endpoint);

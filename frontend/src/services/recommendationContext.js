@@ -145,3 +145,50 @@ export function rankAnonymousProducts(products) {
     })
     .map((entry) => entry.product);
 }
+
+export function buildAnonymousProfile() {
+
+  const {
+    searches,
+    views
+  } = getAnonymousActivity();
+
+  const categoryCount = {};
+
+  views.forEach((item) => {
+
+    const type =
+      item.product_type_name;
+
+    if (!type) {
+      return;
+    }
+
+    categoryCount[type] =
+      (categoryCount[type] || 0) + 1;
+  });
+
+  const favoriteCategory =
+    Object.keys(categoryCount)
+      .sort(
+        (a, b) =>
+          categoryCount[b] -
+          categoryCount[a]
+      )[0] || "Top";
+
+  return {
+
+    favorite_product_type:
+      favoriteCategory,
+
+    interest_categories: [
+      favoriteCategory
+    ],
+
+    search_count:
+      searches.length,
+
+    view_count:
+      views.length
+  };
+}

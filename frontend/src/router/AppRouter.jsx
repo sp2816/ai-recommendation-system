@@ -23,6 +23,7 @@ function Layout() {
   const location = useLocation();
 
   const hideLayout =
+    location.pathname === "/" ||
     location.pathname === "/login" ||
     location.pathname === "/register";
 
@@ -39,18 +40,13 @@ function Layout() {
       <main>
         <Routes>
 
-          {/* Dashboard / Home */}
+          {/* Default Route */}
           <Route
             path="/"
-            element={<Dashboard />}
+            element={<Login />}
           />
 
-          <Route
-            path="/dashboard"
-            element={<Dashboard />}
-          />
-
-          {/* Auth */}
+          {/* Auth Routes */}
           <Route
             path="/login"
             element={<Login />}
@@ -59,6 +55,12 @@ function Layout() {
           <Route
             path="/register"
             element={<Register />}
+          />
+
+          {/* Dashboard */}
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
           />
 
           {/* Product Details */}
