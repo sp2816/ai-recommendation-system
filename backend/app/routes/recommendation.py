@@ -27,7 +27,15 @@ redis_client = redis.Redis(
         "REDIS_HOST",
         "redis"
     ),
-    port=6379,
+    port=int(
+        os.getenv(
+            "REDIS_PORT",
+            6379
+        )
+    ),
+    password=os.getenv(
+        "REDIS_PASSWORD"
+    ),
     db=0,
     decode_responses=True
 )

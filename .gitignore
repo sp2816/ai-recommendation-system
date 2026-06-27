@@ -102,3 +102,7 @@ ml/data/processed/
 *.h5
 *.weights.h5
 ml/models/
+
+.env
+.env.*
+!.env.example
