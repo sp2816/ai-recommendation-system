@@ -100,7 +100,9 @@ def get_products(limit: int = 1000, category: str | None = None):
                 product_group_name,
                 colour_group_name,
                 price,
-                description
+                description,
+                image_url,
+                product_url
             FROM products
 
             WHERE
@@ -174,7 +176,9 @@ def search_products(
                     product_group_name,
                     colour_group_name,
                     price,
-                    description
+                    description,
+                    image_url,
+                    product_url
 
                 FROM products
 
@@ -277,7 +281,9 @@ def get_trending_products(category: str | None = None):
                 product_group_name,
                 colour_group_name,
                 price,
-                description
+                description,
+                image_url,
+                product_url
 
             FROM products
 
@@ -300,23 +306,23 @@ def get_trending_products(category: str | None = None):
                 row._mapping
             )
 
-            article_id = str(
-                product["article_id"]
-            )
+            # article_id = str(
+            #     product["article_id"]
+            # )
 
-            folder = (
-                f"0{article_id[:2]}"
-            )
+            # folder = (
+            #     f"0{article_id[:2]}"
+            # )
 
-            image_name = (
-                f"0{article_id}.jpg"
-            )
+            # image_name = (
+            #     f"0{article_id}.jpg"
+            # )
 
-            product["image_url"] = (
-                "http://127.0.0.1:8000/"
-                f"images/{folder}/"
-                f"{image_name}"
-            )
+            # product["image_url"] = (
+            #     "http://127.0.0.1:8000/"
+            #     f"images/{folder}/"
+            #     f"{image_name}"
+            # )
 
             products.append(
                 product
@@ -340,7 +346,16 @@ def get_product(article_id: int):
 
     try:
         query = text("""
-            SELECT *
+            SELECT
+                article_id,
+                product_name,
+                product_type_name,
+                product_group_name,
+                colour_group_name,
+                price,
+                description,
+                image_url,
+                product_url
             FROM products
             WHERE article_id = :article_id
         """)
@@ -365,23 +380,23 @@ def get_product(article_id: int):
             product._mapping
         )
 
-        article_id_str = str(
-            product["article_id"]
-        )
+        # article_id_str = str(
+        #     product["article_id"]
+        # )
 
-        folder = (
-            f"0{article_id_str[:2]}"
-        )
+        # folder = (
+        #     f"0{article_id_str[:2]}"
+        # )
 
-        image_name = (
-            f"0{article_id_str}.jpg"
-        )
+        # image_name = (
+        #     f"0{article_id_str}.jpg"
+        # )
 
-        product["image_url"] = (
-            "http://127.0.0.1:8000/"
-            f"images/{folder}/"
-            f"{image_name}"
-        )
+        # product["image_url"] = (
+        #     "http://127.0.0.1:8000/"
+        #     f"images/{folder}/"
+        #     f"{image_name}"
+        # )
 
         return {
             "status": "success",

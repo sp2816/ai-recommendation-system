@@ -3,6 +3,7 @@ from backend.app.database.db import engine
 
 
 def get_product_details(article_ids):
+
     if not article_ids:
         return []
 
@@ -18,9 +19,9 @@ def get_product_details(article_ids):
             product_group_name,
             colour_group_name,
             image_url,
-            price,
+            product_url,
             description,
-            product_url
+            price
         FROM products
         WHERE article_id IN ({placeholders})
     """)
@@ -31,6 +32,7 @@ def get_product_details(article_ids):
     }
 
     with engine.connect() as conn:
+
         result = conn.execute(query, params)
 
         return [
