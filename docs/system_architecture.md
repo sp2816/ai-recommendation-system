@@ -1,6 +1,3 @@
-# AI Recommendation System Architecture
-
-```text
                     USER / FRONTEND
                            │
                            ▼
@@ -8,40 +5,79 @@
                            │
                            ▼
                     FastAPI Backend
-                  (/recommend/{user_id})
                            │
-          ┌────────────────┴──────────────┐
-          ▼                               ▼
-      Redis Feature Store          Recommendation Engine
-   (User Profiles + Item Vectors)   (ANN Similarity Search)
-          │                               │
-          └──────────────┬────────────────┘
-                         ▼
-               Recommendation Response
-              (Top K Recommended Products)
-                         │
-                         ▼
-                    Frontend UI
+      ┌────────────────────┼────────────────────┐
+      ▼                    ▼                    ▼
+ Product APIs      User Activity APIs      Recommendation API
+ (/products)      (search/view history)   (/recommend/{user_id})
+      │                    │                    │
+      └──────────────┬─────┴─────┬─────────────┘
+                     ▼           ▼
+               PostgreSQL      Redis
+              Application DB  Feature Store
+                     │           │
+                     └─────┬─────┘
+                           ▼
+                 Recommendation Engine
+              (ANN Search + Re-ranking)
+                           │
+                           ▼
+              Personalized Recommendations
+                           │
+                           ▼
+                    Frontend Dashboard
 
 
 ────────────────────────────────────────
 
 Offline ML Pipeline
 
-Transaction Dataset
+H&M Dataset
+(articles.csv + transactions.csv + customers.csv)
         │
         ▼
-Feature Engineering (PySpark)
+Data Preprocessing & Feature Engineering
         │
         ▼
-Two-Tower Model Training (TFRS)
+Two-Tower Recommendation Model (TensorFlow Recommenders)
         │
         ▼
-Item Embeddings Generation
+User Embeddings
+Item Embeddings
         │
         ▼
-Redis Storage Update
+ANN Candidate Retrieval
         │
         ▼
-FastAPI Serving
-```
+Embedding Storage
+(Redis Feature Store)
+        │
+        ▼
+FastAPI Recommendation Serving
+
+
+────────────────────────────────────────
+
+User Activity Flow
+
+Search Product
+      │
+      ▼
+search_history table
+
+View Product
+      │
+      ▼
+view_history table
+
+Recommendation Generated
+      │
+      ▼
+user_interactions table
+
+Wishlist Added
+      │
+      ▼
+wishlist table
+
+These signals influence future recommendations.
