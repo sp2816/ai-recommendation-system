@@ -3,8 +3,10 @@ from sqlalchemy import text
 
 from backend.app.database.db import SessionLocal
 
-router = APIRouter()
-
+router = APIRouter(
+    prefix="/api",
+    tags=["Products"]
+)
 
 CATEGORY_SEARCH_TERMS = {
     "Dress": ["dress"],
@@ -92,7 +94,7 @@ def get_products(limit: int = 1000, category: str | None = None):
                 "LOWER(product_type_name) NOT LIKE '%sock%'"
             ])
 
-        query = text(f"""
+        query = text("""
             SELECT
                 article_id,
                 product_name,
@@ -104,12 +106,9 @@ def get_products(limit: int = 1000, category: str | None = None):
                 image_url,
                 product_url
             FROM products
-
             WHERE
-                {' AND '.join(where_clauses)}
-
+                """ + " AND ".join(where_clauses) + """
             ORDER BY article_id
-
             LIMIT :limit
         """)
 
@@ -121,33 +120,7 @@ def get_products(limit: int = 1000, category: str | None = None):
         products = []
 
         for row in result:
-
-            product = dict(
-                row._mapping
-            )
-
-            article_id = str(
-                product["article_id"]
-            )
-
-            # Example:
-            # 108775015 -> 010
-            # 110065001 -> 011
-            folder = (
-                f"0{article_id[:2]}"
-            )
-
-            image_name = (
-                f"0{article_id}.jpg"
-            )
-
-            product["image_url"] = (
-                "http://127.0.0.1:8000/"
-                f"images/{folder}/"
-                f"{image_name}"
-            )
-
-            products.append(product)
+            products.append(dict(row._mapping))
 
         return {
             "status": "success",
@@ -204,32 +177,7 @@ def search_products(
         products = []
 
         for row in result:
-
-            product = dict(
-                row._mapping
-            )
-
-            article_id = str(
-                product["article_id"]
-            )
-
-            folder = (
-                f"0{article_id[:2]}"
-            )
-
-            image_name = (
-                f"0{article_id}.jpg"
-            )
-
-            product["image_url"] = (
-                "http://127.0.0.1:8000/"
-                f"images/{folder}/"
-                f"{image_name}"
-            )
-
-            products.append(
-                product
-            )
+            products.append(dict(row._mapping))
 
         return {
             "status":

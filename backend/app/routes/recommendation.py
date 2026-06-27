@@ -17,7 +17,7 @@ from ml.src.product_lookup import (
 
 
 router = APIRouter(
-    prefix="/recommend",
+    prefix="/api",
     tags=["Recommendation"]
 )
 
@@ -327,7 +327,7 @@ def _log_recommendation_history(user_id, recommended_products, db):
     db.commit()
 
 
-@router.get("/{user_id}")
+@router.get("/recommend/{user_id}")
 def recommend(
     user_id: str
 ):
