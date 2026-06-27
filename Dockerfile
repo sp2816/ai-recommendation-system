@@ -9,7 +9,7 @@ RUN pip install -r requirements-prod.txt
 
 COPY . .
 
-RUN python ml/scripts/download_models.py
+RUN python scripts/download_models.py
 
 EXPOSE 8000
 
