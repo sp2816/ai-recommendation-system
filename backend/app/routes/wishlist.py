@@ -83,21 +83,7 @@ def get_wishlist(user_id: int):
         products = []
 
         for row in result:
-
-            product = dict(row._mapping)
-
-            article_id = str(product["article_id"])
-
-            folder = f"0{article_id[:2]}"
-            image_name = f"0{article_id}.jpg"
-
-            product["image_url"] = (
-                "http://127.0.0.1:8000/"
-                f"images/{folder}/"
-                f"{image_name}"
-            )
-
-            products.append(product)
+            products.append(dict(row._mapping))
 
         return {
             "status": "success",
