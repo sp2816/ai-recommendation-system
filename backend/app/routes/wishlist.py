@@ -92,7 +92,7 @@ def get_wishlist(user_id: int):
             image_name = f"0{article_id}.jpg"
 
             product["image_url"] = (
-                "http://127.0.0.1:8000/"
+                "http://import.meta.env.VITE_API_URL/"
                 f"images/{folder}/"
                 f"{image_name}"
             )

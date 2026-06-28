@@ -1,7 +1,7 @@
 import requests
 import json
 
-URL = "http://127.0.0.1:8000/recommend/40beb0b49193159063a6f6135e02b4f42d96de02234afea9a002b8e193195431"
+URL = "http://import.meta.env.VITE_API_URL/recommend/40beb0b49193159063a6f6135e02b4f42d96de02234afea9a002b8e193195431"
 
 
 def main():

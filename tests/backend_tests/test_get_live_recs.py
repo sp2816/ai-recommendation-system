@@ -9,7 +9,7 @@ if str(ROOT) not in sys.path:
 
 
 def test_get_live_recs_skip_if_unavailable():
-    url = 'http://127.0.0.1:8000/recommend/1'
+    url = 'http://import.meta.env.VITE_API_URL/recommend/1'
     try:
         r = requests.get(url, timeout=3)
     except Exception as e:

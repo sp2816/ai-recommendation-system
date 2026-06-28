@@ -42,7 +42,7 @@ function Header() {
       if (currentUser) {
 
         await axios.post(
-          "http://127.0.0.1:8000/api/search/save",
+          "http://import.meta.env.VITE_API_URL/api/search/save",
           {
             user_id: currentUser.id,
             search_query: search

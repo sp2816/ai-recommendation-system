@@ -140,7 +140,7 @@ def get_products(limit: int = 1000, category: str | None = None):
             )
 
             product["image_url"] = (
-                "http://127.0.0.1:8000/"
+                "http://import.meta.env.VITE_API_URL/"
                 f"images/{folder}/"
                 f"{image_name}"
             )
@@ -218,7 +218,7 @@ def search_products(
             )
 
             product["image_url"] = (
-                "http://127.0.0.1:8000/"
+                "http://import.meta.env.VITE_API_URL/"
                 f"images/{folder}/"
                 f"{image_name}"
             )
@@ -313,7 +313,7 @@ def get_trending_products(category: str | None = None):
             )
 
             product["image_url"] = (
-                "http://127.0.0.1:8000/"
+                "http://import.meta.env.VITE_API_URL/"
                 f"images/{folder}/"
                 f"{image_name}"
             )
@@ -378,7 +378,7 @@ def get_product(article_id: int):
         )
 
         product["image_url"] = (
-            "http://127.0.0.1:8000/"
+            "http://import.meta.env.VITE_API_URL/"
             f"images/{folder}/"
             f"{image_name}"
         )

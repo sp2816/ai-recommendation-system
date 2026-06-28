@@ -262,7 +262,7 @@ function RecommendedProducts() {
 
                   <img
                     className="recommendation-image"
-                    src={`http://127.0.0.1:8000/images/${String(item.article_id).slice(0, 3)}/${item.article_id}.jpg`}
+                    src={`http://import.meta.env.VITE_API_URL/images/${String(item.article_id).slice(0, 3)}/${item.article_id}.jpg`}
                     alt={
                       item.prod_name ||
                       item.product_name

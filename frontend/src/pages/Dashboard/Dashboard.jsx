@@ -12,7 +12,7 @@ import {
 
 import API from "../../api/productApi";
 
-import RecommendedProducts from "../../components/RecommendedProducts";
+import RecommendedProducts from "../../components/recommendedProducts";
 
 import {
   getLoggedInUser
