@@ -2,6 +2,7 @@ import "./Header.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import API from "../../api/productApi";
 
 import {
   saveAnonymousSearch,
@@ -42,7 +43,7 @@ function Header() {
       if (currentUser) {
 
         await axios.post(
-          "http://127.0.0.1:8000/api/search/save",
+          "/search/save",
           {
             user_id: currentUser.id,
             search_query: search

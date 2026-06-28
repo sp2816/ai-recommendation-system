@@ -100,7 +100,9 @@ def get_products(limit: int = 1000, category: str | None = None):
                 product_group_name,
                 colour_group_name,
                 price,
-                description
+                description,
+                image_url,
+                product_url
             FROM products
 
             WHERE
@@ -119,33 +121,7 @@ def get_products(limit: int = 1000, category: str | None = None):
         products = []
 
         for row in result:
-
-            product = dict(
-                row._mapping
-            )
-
-            article_id = str(
-                product["article_id"]
-            )
-
-            # Example:
-            # 108775015 -> 010
-            # 110065001 -> 011
-            folder = (
-                f"0{article_id[:2]}"
-            )
-
-            image_name = (
-                f"0{article_id}.jpg"
-            )
-
-            product["image_url"] = (
-                "http://127.0.0.1:8000/"
-                f"images/{folder}/"
-                f"{image_name}"
-            )
-
-            products.append(product)
+            products.append(dict(row._mapping))
 
         return {
             "status": "success",
@@ -174,7 +150,9 @@ def search_products(
                     product_group_name,
                     colour_group_name,
                     price,
-                    description
+                    description,
+                    image_url,
+                    product_url
 
                 FROM products
 
@@ -200,32 +178,7 @@ def search_products(
         products = []
 
         for row in result:
-
-            product = dict(
-                row._mapping
-            )
-
-            article_id = str(
-                product["article_id"]
-            )
-
-            folder = (
-                f"0{article_id[:2]}"
-            )
-
-            image_name = (
-                f"0{article_id}.jpg"
-            )
-
-            product["image_url"] = (
-                "http://127.0.0.1:8000/"
-                f"images/{folder}/"
-                f"{image_name}"
-            )
-
-            products.append(
-                product
-            )
+            products.append(dict(row._mapping))
 
         return {
             "status":
@@ -277,7 +230,9 @@ def get_trending_products(category: str | None = None):
                 product_group_name,
                 colour_group_name,
                 price,
-                description
+                description,
+                image_url,
+                product_url
 
             FROM products
 
@@ -295,32 +250,7 @@ def get_trending_products(category: str | None = None):
         products = []
 
         for row in result:
-
-            product = dict(
-                row._mapping
-            )
-
-            article_id = str(
-                product["article_id"]
-            )
-
-            folder = (
-                f"0{article_id[:2]}"
-            )
-
-            image_name = (
-                f"0{article_id}.jpg"
-            )
-
-            product["image_url"] = (
-                "http://127.0.0.1:8000/"
-                f"images/{folder}/"
-                f"{image_name}"
-            )
-
-            products.append(
-                product
-            )
+            products.append(dict(row._mapping))
 
         return {
             "status":
@@ -365,23 +295,6 @@ def get_product(article_id: int):
             product._mapping
         )
 
-        article_id_str = str(
-            product["article_id"]
-        )
-
-        folder = (
-            f"0{article_id_str[:2]}"
-        )
-
-        image_name = (
-            f"0{article_id_str}.jpg"
-        )
-
-        product["image_url"] = (
-            "http://127.0.0.1:8000/"
-            f"images/{folder}/"
-            f"{image_name}"
-        )
 
         return {
             "status": "success",
