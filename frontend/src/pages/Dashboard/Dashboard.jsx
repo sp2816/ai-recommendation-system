@@ -53,9 +53,25 @@ function Dashboard() {
           endpoint = `/products/search?query=${encodeURIComponent(searchQuery)}`;
         } else if (currentUser?.id) {
           const recommendationResponse = await getRecommendations(currentUser.id);
+
+          console.log("========== USER ==========");
+          console.log(recommendationResponse.user_profile);
+
+          console.log("========== RECOMMENDATIONS ==========");
+          console.table(
+            recommendationResponse.recommendations.map((item) => ({
+              Product: item.prod_name,
+              Type: item.product_type_name,
+              Colour: item.colour_group_name,
+              Score: item._final_score
+            }))
+          );
+
           const preferredCategory =
             recommendationResponse?.user_profile?.interest_categories?.[0] ||
             recommendationResponse?.user_profile?.favorite_product_type;
+
+          
 
           endpoint = preferredCategory
             ? `/products/trending?category=${encodeURIComponent(preferredCategory)}`
