@@ -35,6 +35,10 @@ origins = [
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+
+    "https://ai-recommendation-system-phi.vercel.app",
+    "https://ai-recommendation-system-git-main-sp2816s-projects.vercel.app",
+    "https://ai-recommendation-system-r3gprgx85-sp2816s-projects.vercel.app",
 ]
 
 app.add_middleware(
