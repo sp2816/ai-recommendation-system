@@ -99,7 +99,7 @@ function ProductDetails() {
 
         const response =
           await WISHLIST_API.post(
-            "/wishlist/add",
+            "/api/wishlist/add",
             {
               user_id:
               user.id,

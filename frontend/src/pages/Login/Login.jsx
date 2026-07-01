@@ -53,7 +53,7 @@ function Login() {
 
           await AUTH_API.post(
 
-            "/login",
+            "/api/login",
 
             formData
           );

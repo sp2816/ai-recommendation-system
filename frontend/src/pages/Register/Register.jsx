@@ -38,7 +38,7 @@ function Register() {
 
         const response =
           await AUTH_API.post(
-            "/register",
+            "/api/register",
             formData
           );
 
