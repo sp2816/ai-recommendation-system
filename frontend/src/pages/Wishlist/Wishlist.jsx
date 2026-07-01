@@ -42,7 +42,7 @@ function Wishlist() {
 
         const response =
           await WISHLIST_API.get(
-            `/wishlist/${user.id}`
+            `/api/wishlist/${user.id}`
           );
 
         setProducts(
@@ -82,7 +82,7 @@ function Wishlist() {
       try {
 
         await WISHLIST_API.delete(
-          "/wishlist/remove",
+          "/api/wishlist/remove",
           {
             params: {
               user_id:

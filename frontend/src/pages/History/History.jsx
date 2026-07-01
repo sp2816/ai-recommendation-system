@@ -172,13 +172,13 @@ function History() {
 
               <div className="history-card">
 
-                <img
-                  src={item.image_url}
+                {/* <img
+                  // src={item.image_url}
                   alt={item.product_name}
-                  onError={(e) => {
-                    e.currentTarget.src = FALLBACK_IMAGE;
-                  }}
-                />
+                  // onError={(e) => {
+                  //   e.currentTarget.src = FALLBACK_IMAGE;
+                  // }}
+                /> */}
 
                 <div className="history-card-body">
 

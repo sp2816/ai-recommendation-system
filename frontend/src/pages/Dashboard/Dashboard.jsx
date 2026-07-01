@@ -24,9 +24,43 @@ import {
 
 const FALLBACK_IMAGE =
   "data:image/svg+xml;charset=UTF-8," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400"><rect width="300" height="400" fill="#f3f4f6"/><text x="150" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#6b7280">No Image</text><text x="150" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#9ca3af">Available</text></svg>'
-  );
+  encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="300"
+     height="400">
+
+<rect width="100%" height="100%" fill="#f5f5f5"/>
+
+<text
+x="50%"
+y="45%"
+text-anchor="middle"
+font-size="58">
+🖼️
+</text>
+
+<text
+x="50%"
+y="58%"
+text-anchor="middle"
+font-size="18"
+fill="#777"
+font-family="Arial">
+No Image
+</text>
+
+<text
+x="50%"
+y="66%"
+text-anchor="middle"
+font-size="15"
+fill="#999"
+font-family="Arial">
+Available
+</text>
+
+</svg>
+`);
 
 
 function Dashboard() {
